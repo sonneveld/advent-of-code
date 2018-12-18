@@ -73,7 +73,3 @@ for r in recipe_generator():
         break
 
 print(count - len(input))
-
-
-# 7121102535
-# 20236441
