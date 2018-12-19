@@ -25,49 +25,34 @@ def disasm(instruction):
         return f"r{c} = r{a} + {b}"
     elif opname == 'mulr':
         return f"r{c} = r{a} * r{b}"
-        reg[c] = reg[a] * reg[b]
     elif opname == 'muli':
         return f"r{c} = r{a} * {b}"
-        reg[c] = reg[a] * b
-
     elif opname == 'banr':
         return f"r{c} = r{a} & r{b}"
-        reg[c] = reg[a] & reg[b]
     elif opname == 'bani':
         return f"r{c} = r{a} & {b}"
-        reg[c] = reg[a] & b
     elif opname == 'borr':
         return f"r{c} = r{a} | r{b}"
-        reg[c] = reg[a] | reg[b]
     elif opname == 'bori':
         return f"r{c} = r{a} | {b}"
-        reg[c] = reg[a] | b
     elif opname == 'setr':
         return f"r{c} = r{a}"
-        reg[c] = reg[a]
     elif opname == 'seti':
         return f"r{c} = {a}"
-        reg[c] = a
     elif opname == 'gtir':
         return f"r{c} = {a} > r{b}"
-        reg[c] = 1 if a > reg[b] else 0
     elif opname == 'gtri':
         return f"r{c} = r{a} > {b}"
-        reg[c] = 1 if reg[a] > b else 0
     elif opname == 'gtrr':
         return f"r{c} = r{a} > r{b}"
-        reg[c] = 1 if reg[a] > reg[b] else 0
     elif opname == 'eqir':
         return f"r{c} = {a} == r{b}"
-        reg[c] = 1 if a == reg[b] else 0
     elif opname == 'eqri':
         return f"r{c} = r{a} == {b}"
-        reg[c] = 1 if reg[a] == b else 0
     elif opname == 'eqrr':
         return f"r{c} = r{a} == r{b}"
-        reg[c] = 1 if reg[a] == reg[b] else 0
     else:
-        raise Exception(f"unknown  instruction opname")
+        raise Exception(f"unknown instruction {instruction}")
 
 
 def peephole(ip, ip_reg, asm):
