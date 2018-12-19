@@ -104,10 +104,9 @@ def peephole(ip, ip_reg, asm):
     return asm
 
 
-
+# separate basic blocks
 def find_breaks(ip, asm):
     result = set()
-    # separate basic blocks
     if 'goto' in asm:
         result.add(ip)
         n = int(asm.split()[-1])
@@ -115,7 +114,6 @@ def find_breaks(ip, asm):
     if 'halt' in asm:
         result.add(ip)
     return result
-
 
 
 
@@ -133,19 +131,13 @@ for line in data:
     instruction = tokens[:1] + [int(x) for x in tokens[1:]]
     code.append(instruction)
 
-
 result = []
 breaks = set()
-
 for ip, instruction in enumerate(code):
-
     asm = disasm(instruction)
     asm = peephole(ip, ip_reg, asm)
-
     breaks |= find_breaks(ip, asm)
-
     result.append(asm)
-
 
 for ip, asm in enumerate(result):
     print (f"{ip:04} {asm}")
