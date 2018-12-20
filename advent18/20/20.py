@@ -114,6 +114,7 @@ def add_node(prevlist, n):
         p.next.append(n)
     return [n]
 
+# create graph, with next links (by keeping track of prev nodes)
 def consume_path(token_stream, prevlist):
 
     while True:
@@ -225,6 +226,7 @@ walkers = [(start_node, 0, 0)]
 while len(walkers) > 0:
     node, x, y = walkers.pop()
 
+    # collapse walker states if there's already been a walker with the same node + initial position
     seen_key = (id(node), x, y)
     if seen_key in seen:
         continue
