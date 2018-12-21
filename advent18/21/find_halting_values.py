@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 
-data = open('halting_values.txt').readlines()
-data = [int(x) for x in data]
 seen = set()
-first_halting = data[0]
+first_halting = None
 last_halting = None
-for x in data:
-        if x in seen:
-                break
-        last_halting = x
-        seen.add(x)
+
+with open('halting_values.txt') as f:
+
+        for line in f:
+                x = int(line)
+                if first_halting is None:
+                        first_halting = x
+                if x in seen:
+                        break
+                last_halting = x
+                seen.add(x)
 
 print (first_halting)
 print (last_halting)
