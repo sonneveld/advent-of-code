@@ -4,6 +4,7 @@ import re
 import collections
 import sys
 import os
+import time
 
 DEBUG = "DEBUG" in os.environ
 
@@ -140,72 +141,63 @@ consume_path(token_stream, [start_node])
 token_stream.consume(EndT)
 
 
-# hacky print map
+# Print Map
 
-def dump_map(start_node):
+map_tile_lookup = {
+'WE':'─',
+'NS':'│',
+'SE':'┌',
+'SW':'┐',
+'NE':'└',
+'NW':'┘',
+'NSE':'├',
+'NSW':'┤',
+'SWE':'┬',
+'NWE':'┴',
+'NSWE':'┼',
+'W':'╴',
+'N':'╵',
+'E':'╶',
+'S':'╷',
+'': ' ',
+}
 
-    room_set = set()
-    south_open_set = set()
-    east_open_set = set()
+def open_directions(rooms, room):
+    x,y = room.x, room.y
+    result = []
+    if (x,y-1) in room.open:
+        result.append("N")
+    if (x,y+1) in room.open:
+        result.append("S")
+    if (x-1,y) in room.open:
+        result.append("W")
+    if (x+1,y) in room.open:
+        result.append("E")
+    return ''.join(result)
 
-    seen = set()
-    walkers = [(start_node, 0, 0)]
-
-    while len(walkers) > 0:
-        node, x, y = walkers.pop()
-
-        seen_key = (id(node), x, y)
-        if seen_key in seen:
-            continue
-        seen.add(seen_key)
-
-        room_set.add( (x,y) )
-
-        for ch in node.value:
-
-            if ch == "N":
-                y -= 1
-                south_open_set.add( (x,y) )
-
-            if ch == "S":
-                south_open_set.add( (x,y) )
-                y += 1
-            if ch == "E":
-                east_open_set.add( (x,y) )
-                x += 1
-            if ch == "W":
-                x -= 1
-                east_open_set.add( (x,y) )
-
-        for n in node.next:
-            walkers.append( (n, x, y) )
-
-    x_min = min(p[0] for p in room_set)
-    x_max = max(p[0] for p in room_set)
-    y_min = min(p[1] for p in room_set)
-    y_max = max(p[1] for p in room_set)
-    print(x_min, x_max, y_min, y_max)
+def dump_map(rooms):
+    sys.stdout.write("\x1b[2J\x1b[H")
+    # x_min = min(p[0] for p in rooms)
+    # x_max = max(p[0] for p in rooms)
+    # y_min = min(p[1] for p in rooms)
+    # y_max = max(p[1] for p in rooms)
+    x_min, x_max, y_min, y_max = -49, 50, -48, 51
     for y in range(y_min, y_max+1):
         for x in range(x_min, y_max+1):
-            print (" ", end="")
-            if (x,y) in east_open_set:
-                print(" ", end="")
+            room = rooms.get((x,y), None)
+            if room is not None:
+                print(map_tile_lookup[open_directions(rooms, room)], end='')
             else:
-                print("#", end="")
-        print()
-        for x in range(x_min, y_max+1):
-            if (x,y) in south_open_set:
-                print(" ", end="")
-            else:
-                print("#", end="")
-            print ("#", end="")
+                print(' ', end = '')
         print()
 
 
 # Process
 
 class Room(object):
-    def __init__(self):
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
         self.open = set()
 
 
@@ -213,9 +205,9 @@ class Room(object):
 
 def connect_rooms(rooms, a, b):
     if a not in rooms:
-        rooms[a] = Room()
+        rooms[a] = Room(a[0], a[1])
     if b not in rooms:
-        rooms[b] = Room()
+        rooms[b] = Room(b[0], b[1])
     rooms[a].open.add(b)
     rooms[b].open.add(a)
 
@@ -251,6 +243,13 @@ while len(walkers) > 0:
 
     for n in node.next:
         walkers.append( (n, x, y) )
+
+
+    dump_map(rooms)
+    time.sleep(0.05)
+
+
+# dump_map(rooms)
 
 
 # walk and get room distance information
