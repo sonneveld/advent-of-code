@@ -216,40 +216,53 @@ seen = set()
 walkers = [(start_node, 0, 0)]
 
 while len(walkers) > 0:
-    node, x, y = walkers.pop()
 
-    # collapse walker states if there's already been a walker with the same node + initial position
-    seen_key = (id(node), x, y)
-    if seen_key in seen:
-        continue
-    seen.add(seen_key)
+    next_walkers = []
 
-    for ch in node.value:
+    for node,x,y in walkers:
+
+        # collapse walker states if there's already been a walker with the same node + initial position
+        seen_key = (id(node), x, y)
+        if seen_key in seen:
+            continue
+        seen.add(seen_key)
 
         prev_room = (x,y)
 
-        if ch == "N":
-            y -= 1
-        if ch == "S":
-            y += 1
-        if ch == "E":
-            x += 1
-        if ch == "W":
-            x -= 1
+        if len(node.value) > 0:
 
-        room = (x,y)
+            ch = node.value[0]
+            node.value = node.value[1:]
 
-        connect_rooms(rooms, prev_room, room)
+            if ch == "N":
+                y -= 1
+            if ch == "S":
+                y += 1
+            if ch == "E":
+                x += 1
+            if ch == "W":
+                x -= 1
 
-    for n in node.next:
-        walkers.append( (n, x, y) )
+            room = (x,y)
+
+            connect_rooms(rooms, prev_room, room)
+
+        if len(node.value) > 0:
+            next_walkers.append( (node,x,y)  )
+        else:
+            for n in node.next:
+                next_walkers.append( (n, x, y) )
+
+    walkers = next_walkers
 
 
+    if DEBUG:
+        dump_map(rooms)
+        time.sleep(0.05)
+
+
+if DEBUG:
     dump_map(rooms)
-    time.sleep(0.05)
-
-
-# dump_map(rooms)
 
 
 # walk and get room distance information
