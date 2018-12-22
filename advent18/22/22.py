@@ -103,7 +103,6 @@ cost_table = {}
 
 queue = []
 heappush(queue, (0, 0, 0, 'torch'))
-heappush(queue, (7, 0, 0, 'climbing'))
 
 target_best_cost = None
 
@@ -132,20 +131,17 @@ while queue:
     cost_table[ (x,y, tool)] = cost
 
     available_tools = tool_lookup[calc_type(x, y)]
-
     assert tool in available_tools
 
-    adj = calc_adjacent(x,y)
+    for other_tool in available_tools:
+        if other_tool != tool:
+            heappush(queue, (cost+7, x, y, other_tool))
 
-    for next_x, next_y in adj:
+    for next_x, next_y in calc_adjacent(x,y):
         next_type = calc_type(next_x, next_y)
         next_tools = tool_lookup[next_type]
-        for next_tool in next_tools:
-            if next_tool == tool:
-                heappush(queue, (cost+1, next_x, next_y, next_tool))
-            else:
-                if next_tool in available_tools:
-                    heappush(queue, (cost+1+7, next_x, next_y, next_tool))
+        if tool in next_tools:
+            heappush(queue, (cost+1, next_x, next_y, tool))
 
 if DEBUG:
     dump()
