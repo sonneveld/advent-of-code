@@ -42,7 +42,6 @@ def calc_geological_index(x, y):
 
     return calc_erosion_level(x-1, y) * calc_erosion_level(x, y-1)
 
-@lru_cache(maxsize=LRU_CACHE_SIZE)
 def calc_type(x,y):
     return calc_erosion_level(x,y) % 3
 
