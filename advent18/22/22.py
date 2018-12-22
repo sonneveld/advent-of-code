@@ -7,6 +7,8 @@ import os
 from queue import PriorityQueue, Empty
 from functools import lru_cache
 
+sys.setrecursionlimit(2000)
+
 DEBUG = "DEBUG" in os.environ
 
 try:
@@ -18,7 +20,6 @@ with open(input_filename) as f:
     data = f.read()
 
 LRU_CACHE_SIZE = 131072
-SEARCH_PAST_OFFSET = 100
 
 depth, target_x, target_y = [int(x) for x in re.findall(r'[\-\+]?[\d]+', data)]
 target = (target_x, target_y)
@@ -72,12 +73,10 @@ def calc_adjacent(x,y):
     result = []
     if x > 0:
         result.append( (x-1, y) )
-    if x < target[0]+SEARCH_PAST_OFFSET:
-        result.append( (x+1, y) )
+    result.append( (x+1, y) )
     if y > 0:
         result.append( (x, y-1) )
-    if y < target[1]+SEARCH_PAST_OFFSET:
-        result.append( (x, y+1) )
+    result.append( (x, y+1) )
     return result
 
 
@@ -106,6 +105,8 @@ queue = PriorityQueue()
 queue.put((0, 0, 0, 'torch'))
 queue.put((7, 0, 0, 'climbing'))
 
+target_best_cost = None
+
 while True:
 
     try:
@@ -113,15 +114,23 @@ while True:
     except Empty:
         break
 
+    # no need to keep searching if worse than current target
+    if target_best_cost is not None and cost >= target_best_cost:
+        continue
+
     cur_cost = cost_table.get( (x,y, tool) , None)
-    if cur_cost is not None and cur_cost <= cost:
+    if cur_cost is not None and cost >= cur_cost:
         continue
 
     if DEBUG:
         print(cost, x, y, tool)
-        if (x,y) == target:
-            print ("POTENTIAL ANSWER:", cost, x, y, tool)
-            dump()
+
+    if (x,y) == target and tool == "torch":
+        if target_best_cost is None:
+            target_best_cost = cost
+        target_best_cost = min(cost, target_best_cost)
+        if DEBUG:
+            print ("POTENTIAL ANSWER:", cost, x, y)
 
     cost_table[ (x,y, tool)] = cost
 
