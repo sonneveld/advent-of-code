@@ -4,7 +4,7 @@ import re
 import collections
 import sys
 import os
-from queue import PriorityQueue, Empty
+from heapq import heappush, heappop
 from functools import lru_cache
 
 sys.setrecursionlimit(2000)
@@ -101,18 +101,15 @@ def dump():
 
 cost_table = {}
 
-queue = PriorityQueue()
-queue.put((0, 0, 0, 'torch'))
-queue.put((7, 0, 0, 'climbing'))
+queue = []
+heappush(queue, (0, 0, 0, 'torch'))
+heappush(queue, (7, 0, 0, 'climbing'))
 
 target_best_cost = None
 
-while True:
+while queue:
 
-    try:
-        cost, x, y, tool = queue.get_nowait()
-    except Empty:
-        break
+    cost, x, y, tool = heappop(queue)
 
     # no need to keep searching if worse than current target
     if target_best_cost is not None and cost >= target_best_cost:
@@ -145,10 +142,10 @@ while True:
         next_tools = tool_lookup[next_type]
         for next_tool in next_tools:
             if next_tool == tool:
-                queue.put(  (cost+1, next_x, next_y, next_tool) )
+                heappush(queue, (cost+1, next_x, next_y, next_tool))
             else:
                 if next_tool in available_tools:
-                    queue.put(  (cost+1+7, next_x, next_y, next_tool) )
+                    heappush(queue, (cost+1+7, next_x, next_y, next_tool))
 
 if DEBUG:
     dump()
