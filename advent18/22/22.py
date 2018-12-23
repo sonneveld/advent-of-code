@@ -46,6 +46,7 @@ def calc_geological_index(x, y):
 def calc_type(x,y):
     return calc_erosion_level(x,y) % 3
 
+
 # part 1
 
 risk_level = {}
@@ -70,7 +71,6 @@ type_display_lookup = '.=|'
 
 tool_lookup = ( (CLIMBING, TORCH), (CLIMBING, NEITHER), (TORCH, NEITHER), )
 
-@lru_cache(maxsize=LRU_CACHE_SIZE)
 def calc_adjacent(x,y):
     result = []
     if x > 0:
@@ -106,38 +106,24 @@ cost_table = {}
 queue = []
 heappush(queue, (0, 0, 0, TORCH))
 
-target_best_cost = None
-
 while queue:
 
     cost, x, y, tool = heappop(queue)
 
-    # no need to keep searching if worse than current target
-    if target_best_cost is not None and cost >= target_best_cost:
-        continue
-
-    cur_cost = cost_table.get( (x,y, tool) , None)
-    if cur_cost is not None and cost >= cur_cost:
+    best_cost = cost_table.get( (x,y, tool) , None)
+    if best_cost is not None and cost >= best_cost:
         continue
 
     if DEBUG:
         print(cost, x, y, tool)
 
-    if (x,y) == target and tool == TORCH:
-        if target_best_cost is None:
-            target_best_cost = cost
-        target_best_cost = min(cost, target_best_cost)
-        if DEBUG:
-            print ("POTENTIAL ANSWER:", cost, x, y)
+    cost_table[(x,y, tool)] = cost
 
-    cost_table[ (x,y, tool)] = cost
+    if (x,y, tool) == (target_x, target_y, TORCH):
+        break
 
-    available_tools = tool_lookup[calc_type(x, y)]
-    assert tool in available_tools
-
-    for other_tool in available_tools:
-        if other_tool != tool:
-            heappush(queue, (cost+7, x, y, other_tool))
+    for other_tool in (t for t in tool_lookup[calc_type(x, y)] if t != tool):
+        heappush(queue, (cost+7, x, y, other_tool))
 
     for next_x, next_y in calc_adjacent(x,y):
         next_type = calc_type(next_x, next_y)
