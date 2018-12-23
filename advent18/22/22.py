@@ -65,6 +65,7 @@ print(risk_level[target])
 # part 2
 
 NEITHER, TORCH, CLIMBING = (0, 1, 2)
+tool_display_lookup = 'ntc'
 
 type_name_lookup = ('rocky', 'wet', 'narrow')
 type_display_lookup = '.=|'
@@ -90,7 +91,7 @@ def dump():
     for (k,cost) in sorted(cost_table.items()):
         x,y,tool = k
         at_type = type_display_lookup[calc_type(x,y)]
-        display_lookup[(x,y)] = display_lookup.get( (x,y), [at_type[:1]]) + [f'{tool[0]}{cost:04}']
+        display_lookup[(x,y)] = display_lookup.get( (x,y), [at_type[:1]]) + [f'{tool_display_lookup[tool]}{cost:04}']
 
     for y in range(0, target[1]+1):
         for x in range(0, target[0]+1):
