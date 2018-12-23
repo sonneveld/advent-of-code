@@ -63,10 +63,12 @@ print(risk_level[target])
 
 # part 2
 
+NEITHER, TORCH, CLIMBING = (0, 1, 2)
+
 type_name_lookup = ('rocky', 'wet', 'narrow')
 type_display_lookup = '.=|'
 
-tool_lookup = ( ('climbing', 'torch'), ('climbing', 'neither'), ('torch', 'neither'), )
+tool_lookup = ( (CLIMBING, TORCH), (CLIMBING, NEITHER), (TORCH, NEITHER), )
 
 @lru_cache(maxsize=LRU_CACHE_SIZE)
 def calc_adjacent(x,y):
@@ -102,7 +104,7 @@ def dump():
 cost_table = {}
 
 queue = []
-heappush(queue, (0, 0, 0, 'torch'))
+heappush(queue, (0, 0, 0, TORCH))
 
 target_best_cost = None
 
@@ -121,7 +123,7 @@ while queue:
     if DEBUG:
         print(cost, x, y, tool)
 
-    if (x,y) == target and tool == "torch":
+    if (x,y) == target and tool == TORCH:
         if target_best_cost is None:
             target_best_cost = cost
         target_best_cost = min(cost, target_best_cost)
@@ -146,4 +148,4 @@ while queue:
 if DEBUG:
     dump()
 
-print (cost_table[ (target[0], target[1], 'torch')])
+print (cost_table[ (target[0], target[1], TORCH)])
