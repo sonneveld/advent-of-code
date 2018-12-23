@@ -72,14 +72,12 @@ type_display_lookup = '.=|'
 tool_lookup = ( (CLIMBING, TORCH), (CLIMBING, NEITHER), (TORCH, NEITHER), )
 
 def calc_adjacent(x,y):
-    result = []
-    if x > 0:
-        result.append( (x-1, y) )
-    result.append( (x+1, y) )
-    if y > 0:
-        result.append( (x, y-1) )
-    result.append( (x, y+1) )
-    return result
+    return (
+        (x, y+1),
+        (x+1, y),
+        (x-1, y),
+        (x, y-1),
+    )
 
 
 def dump():
@@ -126,6 +124,8 @@ while queue:
         heappush(queue, (cost+7, x, y, other_tool))
 
     for next_x, next_y in calc_adjacent(x,y):
+        if next_x < 0 or next_y < 0:
+            continue
         next_type = calc_type(next_x, next_y)
         next_tools = tool_lookup[next_type]
         if tool in next_tools:
