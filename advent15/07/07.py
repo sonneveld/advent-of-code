@@ -29,8 +29,9 @@ def main():
     with open(input_filename) as f:
         data = f.read()
 
-    print(part1(data))
-    # print(part2(data))
+    value = part1(data)
+    print(value)
+    print(part2(data, value))
 
 
 
@@ -90,16 +91,63 @@ def wire_{c}():
             ''',  globals() )
             continue
 
-#             exec(f'''
-# @lru_cache(None)
-#     def wire_b():
-#         return 956
-#             ''',  globals() )
-
     return wire_a()
 
 
 
+def part2(data, wire_b_value):
+
+    for line in data.splitlines():
+        m = re.match(r'^(\w+) -> (\w+)', line)
+        if m is not None:
+            a, c = m.groups()
+            if c == 'b': continue
+            a = input_map(a)
+            exec(f'''
+@lru_cache(None)
+def wire_{c}():
+    print('wire_{c}')
+    return {a}
+            ''',  globals() )
+            continue
+
+        m = re.match(r'^(\w+) (\w+) (\w+) -> (\w+)', line)
+        if m is not None:
+            a, op, b, c = m.groups()
+            if c == 'b': continue
+            a = input_map(a)
+            op = op_map[op]
+            b = input_map(b)
+            exec(f'''
+@lru_cache(None)
+def wire_{c}():
+    print('wire_{c}')
+    return {a} {op} {b}
+            ''',  globals() )
+            continue
+
+        m = re.match(r'^NOT (\w+) -> (\w+)', line)
+        if m is not None:
+            a, c = m.groups()
+            if c == 'b': continue
+            a = input_map(a)
+            b = input_map(b)
+            exec(f'''
+@lru_cache(None)
+def wire_{c}():
+    print('wire_{c}')
+    return ~ {a}
+            ''',  globals() )
+            continue
+
+    exec(f'''
+@lru_cache(None)
+def wire_b():
+    print("wire_b")
+    return {wire_b_value}
+            ''',  globals() )
+
+    return wire_a()
 
 
 
