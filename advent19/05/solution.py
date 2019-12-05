@@ -47,6 +47,9 @@ def simulator(data):
             return data[val]
         elif param_type == 1:
             return val
+        # guessing at future param types
+        # elif param_type == 2:
+            # return ip + val
         else:
             raise Exception(f"unknown param type: {param_type}")
 
