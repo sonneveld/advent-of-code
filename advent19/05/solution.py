@@ -19,18 +19,6 @@ def load():
         return data
 
 
-def read_val(data, params, param_off, val_in):
-
-    val = None
-    if params[param_off] == 0:  # position
-        val = data[val_in]
-    elif params[param_off] == 1:  # position
-        val = val_in
-    else:
-        raise Exception(f"unknown param: {params[param_off]}")
-
-    return val
-
 def simulator(data):
     """
     >>> simulator([1,9,10,3,2,3,11,0,99,30,40,50])[0]
@@ -49,170 +37,108 @@ def simulator(data):
         print("before", data)
 
     ip = 0
+    packed_op = None
+
+    def src_parameter(param_index):
+        param_type = (packed_op // 100 // (10**param_index) ) % 10
+        val = data[ip + 1 + param_index]
+
+        if param_type == 0:
+            return data[val]
+        elif param_type == 1:
+            return val
+        else:
+            raise Exception(f"unknown param type: {param_type}")
+
+    def dest_parameter(param_index):
+        if DEBUG:
+            param_type = (packed_op // 100 // (10**param_index) ) % 10
+            # assert(param_type == 0)
+            if param_type != 0:
+                print(f"ip:{ip} WARNING dest parameter is not position")
+        val = data[ip + 1 + param_index]
+        return val
 
     while True:
-        instr_ip = ip
 
-
-        op = data[ip]
-        ip += 1
-
-
-        params = []
-        parameter = op // 100
-        for x in range(4):
-            params.append(parameter % 10)
-            parameter //= 10
-
-        op = op % 100
-
+        packed_op = data[ip]
+        op = packed_op % 100
 
         if DEBUG:
-            print("op", op)
+            print("ip:", ip, 'op:', op, 'instr:',data[ip:ip+4])
 
         if op == 99:
             break
     
         elif op == 1:
-            a = data[ip]
-            ip += 1
-            b = data[ip]
-            ip += 1
-            c = data[ip]
-            ip += 1
-            if DEBUG:
-                print('add',a,b,c)
-
-
-            a_val = None
-            if params[0] == 0:  # position
-                a_val = data[a]
-            elif params[0] == 1:  # position
-                a_val = a
-            else:
-                raise Exception(f"unknown param: {params[0]}" )
-
-            b_val = None
-            if params[1] == 0:  # position
-                b_val = data[b]
-            elif params[1] == 1:  # position
-                b_val = b
-            else:
-                raise Exception(f"unknown param: {params[1]}" )
-
-            data[c] = a_val + b_val
+            a = src_parameter(0)
+            b = src_parameter(1)
+            c = dest_parameter(2)
+            data[c] = a + b
+            ip += 4
 
         elif op == 2:
-            a = data[ip]
-            ip += 1
-            b = data[ip]
-            ip += 1
-            c = data[ip]
-            ip += 1
-            if DEBUG:
-                print('mul',a,b,c)
-
-            a_val = None
-            if params[0] == 0:  # position
-                a_val = data[a]
-            elif params[0] == 1:  # position
-                a_val = a
-            else:
-                raise Exception(f"unknown param: {params[0]}" )
-
-
-            b_val = None
-            if params[1] == 0:  # position
-                b_val = data[b]
-            elif params[1] == 1:  # position
-                b_val = b
-            else:
-                raise Exception(f"unknown param: {params[1]}" )
-
-            data[c] = a_val * b_val
+            a = src_parameter(0)
+            b = src_parameter(1)
+            c = dest_parameter(2)
+            data[c] = a * b
+            ip += 4
     
         elif op == 3:
-
-            a = data[ip]
-            ip += 1
+            a = dest_parameter(0)
 
             value = input("input: ")
             value = int(value)
 
             data[a] = value
+            ip += 2
 
         elif op == 4:
-            a = data[ip]
-            ip += 1
-
-            a_val = None
-            if params[0] == 0:  # position
-                a_val = data[a]
-            elif params[0] == 1:  # position
-                a_val = a
-
-            print(a_val)
+            a = src_parameter(0)
+            print(a)
+            ip += 2
 
         elif op == 5:
-            a = data[ip]
-            ip += 1
-            b = data[ip]
-            ip += 1
+            a = src_parameter(0)
+            b = src_parameter(1)
 
-            a_val = read_val(data, params, 0, a)
-            b_val = read_val(data, params, 1, b)
-
-            if a_val != 0:
-                ip = b_val
-
-            assert(ip is not None)
+            if a != 0:
+                ip = b
+                assert(ip is not None)
+            else:
+                ip += 3
 
         elif op == 6:
-            a = data[ip]
-            ip += 1
-            b = data[ip]
-            ip += 1
+            a = src_parameter(0)
+            b = src_parameter(1)
 
-            a_val = read_val(data, params, 0, a)
-            b_val = read_val(data, params, 1, b)
-
-            if a_val == 0:
-                ip = b_val
-            assert(ip is not None)
+            if a == 0:
+                ip = b
+                assert(ip is not None)
+            else:
+                ip += 3
 
         elif op == 7:
-            a = data[ip]
-            ip += 1
-            b = data[ip]
-            ip += 1
-            c = data[ip]
-            ip += 1
+            a = src_parameter(0)
+            b = src_parameter(1)
+            c = dest_parameter(2)
 
-            a_val = read_val(data, params, 0, a)
-            b_val = read_val(data, params, 1, b)
-            c_val = read_val(data, params, 2, c)
-
-            if a_val < b_val:
+            if a < b:
                 data[c] = 1
             else:
                 data[c] = 0
+            ip += 4
 
         elif op == 8:
-            a = data[ip]
-            ip += 1
-            b = data[ip]
-            ip += 1
-            c = data[ip]
-            ip += 1
+            a = src_parameter(0)
+            b = src_parameter(1)
+            c = dest_parameter(2)
 
-            a_val = read_val(data, params, 0, a)
-            b_val = read_val(data, params, 1, b)
-            c_val = read_val(data, params, 2, c)
-
-            if a_val == b_val:
+            if a == b:
                 data[c] = 1
             else:
                 data[c] = 0
+            ip += 4
 
         else:
             raise Exception(f"bad op: {op}")
