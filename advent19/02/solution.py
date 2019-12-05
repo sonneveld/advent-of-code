@@ -61,7 +61,7 @@ def simulator(data):
 
             data[c] = data[a] + data[b]
 
-        elif op == 22:
+        elif op == 2:
             a = data[ip]
             ip += 1
             b = data[ip]
