@@ -131,7 +131,6 @@ def simulator(simstate):
             # print("out", a)
             simstate.output.append(a)
             simstate.ip += 2
-            return
             # return ip, input_buffer, a
 
         # jmp if != 0
