@@ -60,7 +60,7 @@ def part_2(data):
         output = new_out
 
     pixel_map = {
-        1 : "X",
+        1 : "\u2588", # "█",
         0 : " ",
         2 : "?"
     }
