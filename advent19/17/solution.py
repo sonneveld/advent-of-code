@@ -450,13 +450,14 @@ def run_program(data, prog, a, b, c, video='n'):
         ret = simulator(sim_state) 
 
         if ret == 'OUTPUT':
-            x = sim_state.output.pop(0)
-            if x > 0xff:
-                dust_value = x
-            else:
-                ch = chr(x)
-                print(ch, end='')
-                sys.stdout.flush()
+            while sim_state.output:
+                x = sim_state.output.pop(0)
+                if x > 0xff:
+                    dust_value = x
+                else:
+                    ch = chr(x)
+                    print(ch, end='')
+            sys.stdout.flush()
         elif ret == "INPUT":
             x = sys.stdin.read(1)
             if len(x) > 0:
