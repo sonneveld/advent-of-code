@@ -440,8 +440,6 @@ def run_program(data, prog, a, b, c, video=False):
     sim_state = SimState('ASCII', data)
     sim_state.data[0] = 2  # override for part 2
 
-    ret = simulator(sim_state)
-
     for entry in (prog, a, b, c):
         for ch in entry:
             sim_state.input.append(ord(ch))
@@ -453,28 +451,27 @@ def run_program(data, prog, a, b, c, video=False):
         sim_state.input.append(ord('n'))
     sim_state.input.append(ord('\n'))
 
+    dust_value = None
+
     while True:
         ret = simulator(sim_state) 
 
         if ret == 'OUTPUT':
             x = sim_state.output.pop(0)
             if x > 0xff:
-                print(x)
-                break
-            ch = chr(x)
-            print(ch, end='')
-            sys.stdout.flush()
+                dust_value = x
+            else:
+                ch = chr(x)
+                print(ch, end='')
+                sys.stdout.flush()
         elif ret == "INPUT":
             x = sys.stdin.read(1)
             if len(x) > 0:
                 sim_state.input.append(ord(x))
-        else:
+        elif ret == "DONE":
             break
 
-    # something's not right and I have to search memory for answer
-    d = list(sim_state.data)
-    d.sort()
-    print('HACK', d[-1])
+    print(dust_value)
 
 def part_2(data):
     scaffold, robot_pos, robot_direction = capture_scaffold_state(data)
