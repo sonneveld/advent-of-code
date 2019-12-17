@@ -436,20 +436,13 @@ def compile_move_list(move_list):
 
         return prog, a, b, c
 
-def run_program(data, prog, a, b, c, video=False):
+def run_program(data, prog, a, b, c, video='n'):
     sim_state = SimState('ASCII', data)
     sim_state.data[0] = 2  # override for part 2
 
-    for entry in (prog, a, b, c):
-        for ch in entry:
-            sim_state.input.append(ord(ch))
-        sim_state.input.append(ord('\n'))
-
-    if video:
-        sim_state.input.append(ord('y'))
-    else:
-        sim_state.input.append(ord('n'))
-    sim_state.input.append(ord('\n'))
+    complete_input = f'{prog}\n{a}\n{b}\n{c}\n{video}\n'
+    for ch in complete_input:
+        sim_state.input.append(ord(ch))
 
     dust_value = None
 
