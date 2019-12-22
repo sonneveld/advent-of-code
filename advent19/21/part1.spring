@@ -1,0 +1,8 @@
+NOT B J
+NOT C T
+OR T J
+NOT A T
+OR T J
+AND D J
+WALK
+; !(A and B AND C) AND D
