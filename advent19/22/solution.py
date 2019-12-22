@@ -182,7 +182,7 @@ def unshuffle_card_in_deck(data, deck_size, card_index):
 def part_2(data):
     '''
     Shuffling a single card produces an LCG pseudorandom sequence.
-    1) "Unshuffle" cards back from index 2020, determine first few items in sequence
+    1) "Unshuffle" cards backwards (doesn't matter where from), determine first few items in sequence
     2) Determine modulus, multiplier, increment. (We know modulus from number of cards)
     3) Skip through LCG sequence to get final number.
     '''
@@ -192,7 +192,7 @@ def part_2(data):
     seed = 2020
 
     # generate some numbers so we can figure out state
-    card_index = seed
+    card_index = 0
     states = []
     for x in range(10):
         states.append(card_index)
@@ -204,6 +204,42 @@ def part_2(data):
     # skip ahead
     randfast = LcgRandom(multiplier, increment, modulus, seed)
     randfast.skip(NUM_SHUFFLES)
+    return randfast.get_state()
+
+
+def part_2_alternative(data):
+    '''
+    Alternative version that uses sequence from shuffling forwards
+    
+    Shuffling a single card produces an LCG pseudorandom sequence.
+    1) Shuffle cards forwards a few times to determine first few items in sequence
+    2) Determine modulus, multiplier, increment. (We know modulus from number of cards)
+    3) Skip through LCG sequence to get final number.
+
+    We know cards repeat every NUM_CARDS shuffles, so we can skip ahead NUM_CARDS - NUM_SHUFFLES
+    Alternatively, we can skip -NUM_SHUFFLES cause the lib allows it. :)
+    '''
+    
+    NUM_CARDS = 119315717514047
+    NUM_SHUFFLES = 101741582076661
+    seed = 2020
+
+    # generate some numbers so we can figure out state
+    card_index = 0
+    states = []
+    for x in range(10):
+        states.append(card_index)
+        card_index = shuffle_card_in_deck(data, NUM_CARDS, card_index)
+
+    # the known modulus is NUM_CARDS, since that is the period it repeats
+    modulus, multiplier, increment = lcg_crack.crack_unknown_multiplier(states, NUM_CARDS)
+
+    # skip ahead
+    randfast = LcgRandom(multiplier, increment, modulus, seed)
+    if True:
+        randfast.skip(NUM_CARDS - NUM_SHUFFLES - 1)
+    else:
+        randfast.skip(-NUM_SHUFFLES)
     return randfast.get_state()
 
 
