@@ -221,7 +221,7 @@ class Beam:
         assert ret == "INPUT"
 
     @lru_cache(None)
-    def get_beam(self, x, y):
+    def __call__(self, x, y):
         ss = self.sim_state.fork()
         ss.input.append(x)
         ss.input.append(y)
@@ -240,7 +240,7 @@ print_map = {
 }
 
 
-def get_result_points(beam, start_x, start_y):
+def get_result_points(beamf, start_x, start_y):
     for y in range(100):
         for x in range(100):
             yield start_x + x, start_y+y
@@ -248,14 +248,14 @@ def get_result_points(beam, start_x, start_y):
 
 def part_1(data):
 
-    beam = Beam(data)
+    beamf = Beam(data)
 
-    result_points = set(get_result_points(beam, 684, 937))
+    result_points = set(get_result_points(beamf, 684, 937))
 
     count = 0
     for y in range(50):
         for x in range(50):
-            value =  beam.get_beam( x, y )
+            value =  beamf( x, y )
 
             if (x,y) in result_points:
                 value = 2
@@ -268,7 +268,7 @@ def part_1(data):
 
 
 
-def find_y_range(beam, x, y):
+def find_y_range(beamf, x, y):
 
     # we might not be exactly at beam, but search downwards until
     # find start, then keep going until end
@@ -278,7 +278,7 @@ def find_y_range(beam, x, y):
 
     for y_next in itertools.count(y, 1):
 
-        value = beam.get_beam(x, y_next)
+        value = beamf(x, y_next)
 
         if value == 0:
             if y_min is not None:
@@ -299,17 +299,17 @@ def find_y_range(beam, x, y):
 
 
 
-def search_square(beam, start_x, start_y, sqlen):
-    return beam.get_beam(start_x, start_y) == 1 and \
-        beam.get_beam(start_x+sqlen-1, start_y) == 1 and \
-        beam.get_beam(start_x, start_y+sqlen-1) == 1 and \
-        beam.get_beam(start_x+sqlen-1, start_y+sqlen-1) == 1 
+def search_square(beamf, start_x, start_y, sqlen):
+    return beamf(start_x, start_y) == 1 and \
+        beamf(start_x+sqlen-1, start_y) == 1 and \
+        beamf(start_x, start_y+sqlen-1) == 1 and \
+        beamf(start_x+sqlen-1, start_y+sqlen-1) == 1 
 
 
 
 def part_2(data):
 
-    beam = Beam(data)
+    beamf = Beam(data)
 
     # start with a non-zero since beam has some empty columns early on
     x_init = 10
@@ -318,7 +318,7 @@ def part_2(data):
 
     for x in itertools.count(x_init, 1):
 
-        y_min, y_max = find_y_range(beam, x, y_min)
+        y_min, y_max = find_y_range(beamf, x, y_min)
         y_end = y_max+1
 
         y_len = y_end - y_min
@@ -333,7 +333,7 @@ def part_2(data):
             if y_search + 100 > y_end:
                 break
 
-            if search_square(beam, x, y_search, 100):
+            if search_square(beamf, x, y_search, 100):
                 # print("FOUND", x, y_search)
 
                 return x*10000 + y_search
