@@ -1,0 +1,7 @@
+NOTES
+
+lcg skipping
+https://www.nayuki.io/page/fast-skipping-in-a-linear-congruential-generator
+
+cracking lcg
+https://tailcall.net/blog/cracking-randomness-lcgs/
