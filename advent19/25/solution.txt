@@ -1,0 +1,27 @@
+east
+north
+north
+take asterisk
+south
+west
+west
+take astronaut ice cream
+east
+east
+south
+east
+take ornament
+north
+west
+take fixed point
+east
+south
+west
+west
+south
+south
+west
+north
+north
+north
+east
