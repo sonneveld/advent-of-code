@@ -65,6 +65,8 @@ def simulate(data, init_a):
         op = inst[0]
         # print(ip, inst, registers)
 
+        this_ip = ip
+
         if op == "cpy":
             src,destr = inst[1:]
             src = srcval(src)
@@ -90,6 +92,8 @@ def simulate(data, init_a):
             ip += 1
         else:
             raise Exception(f"bad op: {op}")
+
+        assert ip != this_ip # sanity check
 
 
 # decompiled version, probably only for this input
