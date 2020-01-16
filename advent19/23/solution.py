@@ -52,12 +52,13 @@ class Computer:
             if self.queue:
                 p = self.queue.pop(0)
                 x,y = p
+                assert x is not None
                 print(f'[{self.address}]\tProcessing packet {x} {y}')
                 self.sim_state.input.append(x)
                 self.sim_state.input.append(y)
                 self.idle = False
             else:
-                print(f'[{self.address}]\tQueue empty')
+                # print(f'[{self.address}]\tQueue empty')
                 self.sim_state.input.append(-1)
 
         elif ret == "OUTPUT":
@@ -105,45 +106,62 @@ def simulate_network(data):
     idle_count = 10
     nat_sent_list = []
 
+    msg_queue = []
+
     while True:
         print()
         print(f"---- Iteration {iteration} ----")
-        print(f'[SYS]\tpacket count: {packet_count}')
+        print(f'[SYS]\tpacket count: {packet_count}  switch queue: {len(msg_queue)}')
         print()
-        iteration +=1
+        iteration += 1
+
         for c in computers:
-            p = c.process()
-            if p is not None:
-                address, x, y = p
 
-                if address == 255:
-                    print("[NAT]\tStoring:", x, y)
-                    nat_x, nat_y = x,y
-                else:
-                    print('[SYS]\tForwarding:', address, x, y)
-                    computers[address].send_packet(x,y)
-                    packet_count += 1
+            c_idle_count = 10
+            while c_idle_count > 0:
+                p = c.process()
+                if p is not None:
 
-        # use an idle count just to ensure no work being done
+                    if p[0] == 255:
+                        print("[NAT]\tStoring:", p[1], p[2])
+                        nat_x, nat_y = p[1], p[2]
+                    else:
+                        msg_queue.append(p)
+
+                if not c.idle:
+                    c_idle_count = 10
+                c_idle_count -= 1
+
+
+        if msg_queue:
+            print()
+
+        while msg_queue:
+            address,x,y = msg_queue.pop(0)
+
+            print('[SYS]\tForwarding:', address, x, y)
+            computers[address].send_packet(x,y)
+            packet_count += 1
+
+
         is_idle = all(c.idle and len(c.queue) <= 0 for c in computers)
-        if not is_idle:
-            idle_count = 3
-        idle_count -= 1
 
-        if idle_count <= 0:
+        if is_idle:
+            print()
             print("[SYS]\tIdle detected")
             if nat_x is not None:
+                print('[NAT]\tNotifying:', 0, nat_x, nat_y)
                 nat_sent_list.append(nat_y)
                 if  len(nat_sent_list) > 2 and nat_sent_list[-1] == nat_sent_list[-2]:
-                    print()
-                    print(nat_sent_list[0])
-                    print(nat_sent_list[-1])
+                    # DONE!
                     break
-                print('[NAT]\tNotifying:', 0, x, y)
                 computers[0].send_packet(nat_x,nat_y)
                 packet_count += 1
 
 
+    print()
+    print(nat_sent_list[0])
+    print(nat_sent_list[-1])
 
 def main():
     data = load()
